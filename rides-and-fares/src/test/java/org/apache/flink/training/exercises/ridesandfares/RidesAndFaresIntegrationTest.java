@@ -81,7 +81,7 @@ public class RidesAndFaresIntegrationTest extends RidesAndFaresTestBase {
                 (rides, fares, sink) -> (new RidesAndFaresExercise(rides, fares, sink)).execute();
 
         ExecutableTwoInputPipeline<TaxiRide, TaxiFare, RideAndFare> solution =
-                (rides, fares, sink) -> (new RidesAndFaresSolution(rides, fares, sink)).execute();
+                (rides, fares, sink) -> (new RidesAndFaresExercise(rides, fares, sink)).execute();
 
         return new ComposedTwoInputPipeline<>(exercise, solution);
     }

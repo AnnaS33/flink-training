@@ -25,7 +25,7 @@ public class RidesAndFaresUnitTest extends RidesAndFaresTestBase {
             new RidesAndFaresExercise.EnrichmentFunction();
 
     private final RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> javaSolution =
-            new RidesAndFaresSolution.EnrichmentFunction();
+            new RidesAndFaresExercise.EnrichmentFunction();
 
     protected ComposedRichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare>
             composedEnrichmentFunction() {

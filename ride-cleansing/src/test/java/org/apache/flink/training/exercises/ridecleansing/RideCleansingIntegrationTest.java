@@ -67,7 +67,7 @@ public class RideCleansingIntegrationTest extends RideCleansingTestBase {
         ExecutablePipeline<TaxiRide, TaxiRide> exercise =
                 (source, sink) -> (new RideCleansingExercise(source, sink)).execute();
         ExecutablePipeline<TaxiRide, TaxiRide> solution =
-                (source, sink) -> (new RideCleansingSolution(source, sink)).execute();
+                (source, sink) -> (new RideCleansingExercise(source, sink)).execute();
 
         return new ComposedPipeline<>(exercise, solution);
     }

@@ -21,7 +21,10 @@ package org.apache.flink.training.exercises.longrides;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -70,14 +73,12 @@ public class LongRidesExercise {
         // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
         WatermarkStrategy<TaxiRide> watermarkStrategy =
                 WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
-                        .withTimestampAssigner(
-                                (ride, streamRecordTimestamp) -> ride.getEventTimeMillis());
+                        .withTimestampAssigner((ride, streamRecordTimestamp) -> ride.getEventTimeMillis());
 
         // create the pipeline
         rides.assignTimestampsAndWatermarks(watermarkStrategy)
                 .keyBy(ride -> ride.rideId)
-                .process(new AlertFunction())
-                .addSink(sink);
+                .process(new AlertFunction());
 
         // execute the pipeline and return the result
         return env.execute("Long Taxi Rides");
@@ -98,17 +99,65 @@ public class LongRidesExercise {
     @VisibleForTesting
     public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
+        private ValueState<TaxiRide> rideState;
+        private ValueStateDescriptor<TaxiRide> rideStateDescriptor;
+
         @Override
-        public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+        public void open(Configuration config) {
+            rideStateDescriptor = new ValueStateDescriptor<>("ride_event", TaxiRide.class);
+            rideState = getRuntimeContext().getState(rideStateDescriptor);
         }
 
         @Override
-        public void processElement(TaxiRide ride, Context context, Collector<Long> out)
-                throws Exception {}
+        public void processElement(TaxiRide ride, Context context, Collector<Long> out) throws Exception {
+            TimerService timerService = context.timerService();
+            //сохраняем первое событие
+            TaxiRide firstride = rideState.value();
+
+            //если оно null
+            if (firstride == null) {
+                rideState.update(ride);
+                //если ride это собитие начала поездки то устанавливаем таймер на через два часа
+                if (ride.isStart) {
+                    timerService.registerEventTimeTimer(ride.getEventTimeMillis() + 120 * 60 * 1000);
+                }
+                //если firstRideEvent не null
+            } else {
+                //то либо firstRideEvent является окончанием поездки и тогда проверяем сколько между ними прошло времени
+                //и если больше 2 часов то записываем
+                if (ride.isStart) {
+                    if (rideTooLong(ride, firstride)) {
+                        out.collect(ride.rideId);
+                    }
+                    // либо firstRideEvent это событие начала поездки и ride её завершение
+                } else {
+                    //тогда удаляем таймер так как он уже бессмысленен
+                    timerService.deleteEventTimeTimer(firstride.getEventTimeMillis() + 120 * 60 * 1000);
+
+                    // проверяем эти события на то, сколько времени между ними прошло
+                    //если больше двух часов - записываем
+                    if (rideTooLong(firstride, ride)) {
+                        out.collect(ride.rideId);
+                    }
+                }
+                //Раз мы зашли сюда, значит встретили обас события (начало и конец) и можно очищать текущее состояние
+                rideState.clear();
+            }
+        }
 
         @Override
-        public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)
-                throws Exception {}
+        public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out) throws Exception {
+
+            //раз мы здесь, значит таймер сработал, поездка дольше 2 часов, можно сохранять id
+            out.collect(rideState.value().rideId);
+            rideState.clear();
+        }
+
+        //Проверка прошло ли между событиями 2 часа или нет
+        private boolean rideTooLong(TaxiRide startEvent, TaxiRide endEvent) {
+            return Duration.between(startEvent.eventTime, endEvent.eventTime)
+                    .compareTo(Duration.ofHours(2))
+                    > 0;
+        }
     }
 }

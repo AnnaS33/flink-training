@@ -121,7 +121,7 @@ public class HourlyTipsTest {
                 (source, sink) -> new HourlyTipsExercise(source, sink).execute();
 
         ExecutablePipeline<TaxiFare, Tuple3<Long, Long, Float>> solution =
-                (source, sink) -> new HourlyTipsSolution(source, sink).execute();
+                (source, sink) -> new HourlyTipsExercise(source, sink).execute();
 
         return new ComposedPipeline<>(exercise, solution);
     }

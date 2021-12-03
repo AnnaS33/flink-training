@@ -12,7 +12,7 @@ public class RideCleansingUnitTest extends RideCleansingTestBase {
 
     public ComposedFilterFunction<TaxiRide> filterFunction() {
         return new ComposedFilterFunction<>(
-                new RideCleansingExercise.NYCFilter(), new RideCleansingSolution.NYCFilter());
+                new RideCleansingExercise.NYCFilter(), new RideCleansingExercise.NYCFilter());
     }
 
     @Test

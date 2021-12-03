@@ -27,7 +27,7 @@ public class LongRidesUnitTest extends LongRidesTestBase {
             new LongRidesExercise.AlertFunction();
 
     private final KeyedProcessFunction<Long, TaxiRide, Long> javaSolution =
-            new LongRidesSolution.AlertFunction();
+            new LongRidesExercise.AlertFunction();
 
     protected ComposedKeyedProcessFunction composedAlertFunction() {
         return new ComposedKeyedProcessFunction<>(javaExercise, javaSolution);
