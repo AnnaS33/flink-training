@@ -28,7 +28,7 @@ under the License.
 
 Тест
 
-![](1_ex_test.png)
+![](https://github.com/AnnaS33/flink-training/blob/master/1_ex_test.png)
 
 
 
