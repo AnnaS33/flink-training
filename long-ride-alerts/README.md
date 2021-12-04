@@ -26,15 +26,15 @@ under the License.
 Как известно для каждой поездки существует два собития - начало и конец. Так как мы сгруппировали всё по Id поездок, то теперь каждое значение состояния будет содержать оба этих события для каждой поездки, либо одно из них, если имеет место потеря данных или событие ещё не завершилось. Поэтому проверяем все возможные случаи.
 Знакомимся с методом registerEventTimeTimer, который регистрирует таймер, который будет запущен, когда водяной знак времени события пройдет заданное время, и deleteEventTimeTimer, который помогает удалить таймер.
 
-![](4_ex_cod1.png)
+![](https://github.com/AnnaS33/flink-training/blob/master/4_ex_cod1.png)
 
-![](4_ex_cod2.png)
+![](https://github.com/AnnaS33/flink-training/blob/master/4_ex_cod2.png)
 
-![](4_ex_cod3.png)
+![](https://github.com/AnnaS33/flink-training/blob/master/4_ex_cod3.png)
 
 Тест
 
-![](4_ex_test.png)
+![](https://github.com/AnnaS33/flink-training/blob/master/4_ex_test.png)
 
 
 
