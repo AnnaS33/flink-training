@@ -24,7 +24,7 @@ under the License.
 Для определения местоположения начала и окончания поездки был использован метод isInNYC().
 
 
-![](1_ex_cod.png)
+![](flink-training/1_ex_cod.png)
 
 Тест
 
